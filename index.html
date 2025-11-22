@@ -12,10 +12,9 @@
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false">
 
-      <!-- <a-assets>
+      <a-assets>
         <img id="card" src="img20251120_10523693.jpg" />
-        <a-asset-item id="model" src="./hornet.glb"></a-asset-item> -->
-
+        <a-asset-item id="model" src="./hornet.glb"></a-asset-item>
         <video id="vid"
           src="./WhatsApp Video 2025-11-20 at 10.37.00 AM.mp4"
           preload="auto"
@@ -32,7 +31,6 @@
       <a-entity mindar-image-target="targetIndex: 0">
         <a-plane src="#card" position="0 0 0" height="0.552" width="1"></a-plane>
 
-        <!-- Make sure the model sits above the plane and is large enough -->
         <a-gltf-model
           src="#model"
           position="0 0 0.15"
@@ -40,7 +38,6 @@
           scale="0.15 0.15 0.15">
         </a-gltf-model>
 
-        <!-- Video plane slightly above the card, below the model -->
         <a-video src="#vid" width="1" height="0.56" position="0 0 0.06"></a-video>
       </a-entity>
     </a-scene>
@@ -50,10 +47,32 @@
       const scene  = document.querySelector('a-scene');
       const anchor = document.querySelector('[mindar-image-target]');
 
-      scene.addEventListener('arReady', () => { video.play().catch(()=>{}); });
-      anchor.addEventListener('targetFound', () => { video.play().catch(()=>{}); });
-      anchor.addEventListener('targetLost',  () => { video.pause(); });
+      // Ensure the video starts muted
+      video.muted = true;
 
+      scene.addEventListener('arReady', () => {
+        // Play the video but keep it muted initially
+        video.play().catch(()=>{});
+
+        // After 2 seconds, unmute the video automatically
+        setTimeout(() => {
+          video.muted = false;
+        }, 2000);  // 2000 milliseconds = 2 seconds
+      });
+
+      anchor.addEventListener('targetFound', () => {
+        video.play().catch(()=>{});
+        // Ensure the video unmute after 2 seconds
+        setTimeout(() => {
+          video.muted = false;
+        }, 2000);
+      });
+
+      anchor.addEventListener('targetLost',  () => {
+        video.pause();
+      });
+
+      // Optional: Automatically unmute the video after a click, in case you want to keep it
       document.body.addEventListener('click', () => {
         video.muted = false;
         video.play().catch(()=>{});
