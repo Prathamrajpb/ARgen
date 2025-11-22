@@ -3,6 +3,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      /* Style for the controls */
+      .controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px;
+        margin: 5px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+    </style>
   </head>
   <body>
     <a-scene
@@ -13,7 +39,7 @@
       device-orientation-permission-ui="enabled: false">
 
       <a-assets>
-        <!-- Only the video is kept, removed the images and model -->
+        <!-- Only the video is kept -->
         <video id="vid"
           src="./WhatsApp Video 2025-11-20 at 10.37.00 AM.mp4"
           preload="auto"
@@ -28,15 +54,44 @@
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <!-- Entity to show the video -->
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-video src="#vid" width="1" height="0.56" position="0 0 0.06"></a-video>
+      <a-entity id="videoEntity" mindar-image-target="targetIndex: 0">
+        <a-video src="#vid" width="1" height="0.56" position="0 0 0.06" 
+                 animation="property: scale; to: 1.5 1.5 1.5; dur: 2000; loop: false;"></a-video>
       </a-entity>
     </a-scene>
 
+    <!-- Forward and Backward Controls UI -->
+    <div class="controls">
+      <button id="backwardBtn">Backward</button>
+      <button id="forwardBtn">Forward</button>
+    </div>
+
     <script>
       const video = document.getElementById('vid');
+      const backwardBtn = document.getElementById('backwardBtn');
+      const forwardBtn = document.getElementById('forwardBtn');
+      const videoEntity = document.getElementById('videoEntity');
       const scene = document.querySelector('a-scene');
       const anchor = document.querySelector('[mindar-image-target]');
+
+      // Set the jump time for backward and forward buttons (in seconds)
+      const jumpTime = 5; // Jump by 5 seconds
+
+      // Forward button functionality: Skip ahead by jumpTime
+      forwardBtn.addEventListener('click', () => {
+        video.currentTime += jumpTime;
+        if (video.currentTime >= video.duration) {
+          video.currentTime = video.duration; // Prevent it from going beyond the video duration
+        }
+      });
+
+      // Backward button functionality: Skip backward by jumpTime
+      backwardBtn.addEventListener('click', () => {
+        video.currentTime -= jumpTime;
+        if (video.currentTime < 0) {
+          video.currentTime = 0; // Prevent it from going below 0
+        }
+      });
 
       // Ensure the video starts muted
       video.muted = true;
@@ -49,6 +104,9 @@
         setTimeout(() => {
           video.muted = false;
         }, 2000);  // 2000 milliseconds = 2 seconds
+
+        // Apply 3D transition (scaling effect)
+        videoEntity.setAttribute('animation', 'property: scale; to: 1.5 1.5 1.5; dur: 2000; loop: false;');
       });
 
       anchor.addEventListener('targetFound', () => {
@@ -57,6 +115,9 @@
         setTimeout(() => {
           video.muted = false;
         }, 2000);
+
+        // Apply 3D transition (scaling effect)
+        videoEntity.setAttribute('animation', 'property: scale; to: 1.5 1.5 1.5; dur: 2000; loop: false;');
       });
 
       anchor.addEventListener('targetLost',  () => {
